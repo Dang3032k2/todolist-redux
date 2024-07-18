@@ -1,16 +1,22 @@
 import { Button, Space, Table, Typography } from "antd";
 import dayjs from "dayjs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import TaskModal from "./components/TaskModal";
-import { addTask, deleteTask, updateTask } from "./store/slices/todosSlice";
+import {
+  addTodoRequest,
+  deleteTodoRequest,
+  fetchTodosRequest,
+  updateTodoRequest,
+} from "./store/slices/todosSlice";
 
 function App() {
   const todolist = useSelector((state) => state.todos.todos);
+  const isLoading = useSelector((state) => state.todos.loading);
   const dispatch = useDispatch();
-  const generateId = () => {
-    return "_" + Math.random().toString(36).substr(2, 9);
-  };
+  // const generateId = () => {
+  //   return "_" + Math.random().toString(36).substr(2, 9);
+  // };
   const columns = [
     {
       title: "Task",
@@ -60,13 +66,19 @@ function App() {
   };
 
   const onFinish = (values) => {
-    const payload = {
-      content: values.content,
-      duedate: values.duedate.$d,
-      createdAt: new Date(),
-      id: updatingTask ? updatingTask.id : generateId(),
-    };
-    dispatch(updatingTask ? updateTask(payload) : addTask(payload));
+    const payload = updatingTask
+      ? {
+          ...updatingTask,
+          content: values.content,
+          duedate: values.duedate.$d,
+        }
+      : {
+          content: values.content,
+          duedate: values.duedate.$d,
+        };
+    dispatch(
+      updatingTask ? updateTodoRequest(payload) : addTodoRequest(payload)
+    );
     setIsModalOpen(false);
     setUpdatingTask();
   };
@@ -78,8 +90,12 @@ function App() {
     setUpdatingTask(record);
   };
   const handleClickDelete = (task) => {
-    dispatch(deleteTask(task));
+    console.log(task);
+    dispatch(deleteTodoRequest(task));
   };
+  useEffect(() => {
+    dispatch(fetchTodosRequest());
+  }, [dispatch]);
   return (
     <div className="main-container">
       <Space direction="vertical" className="main-container__space">
@@ -93,7 +109,12 @@ function App() {
           handleCancel={handleCancel}
           updatingTask={updatingTask}
         />
-        <Table columns={columns} dataSource={todolist} pagination={false} />
+        <Table
+          columns={columns}
+          dataSource={todolist}
+          pagination={false}
+          loading={isLoading}
+        />
       </Space>
     </div>
   );
