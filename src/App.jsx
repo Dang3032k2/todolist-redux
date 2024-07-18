@@ -2,11 +2,11 @@ import { Button, Space, Table, Typography } from "antd";
 import dayjs from "dayjs";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addTask, deleteTask, updateTask } from "./actions/todolist";
 import TaskModal from "./components/TaskModal";
+import { addTask, deleteTask, updateTask } from "./store/slices/todosSlice";
 
 function App() {
-  const todolist = useSelector((state) => state.todolistReducer);
+  const todolist = useSelector((state) => state.todos.todos);
   const dispatch = useDispatch();
   const generateId = () => {
     return "_" + Math.random().toString(36).substr(2, 9);
